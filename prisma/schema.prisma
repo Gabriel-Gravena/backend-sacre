@@ -1,0 +1,27 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model user {
+  id              Int @id @default(autoincrement())
+  email           String @unique
+  password_hash   String
+  calculations    calculation[]
+  created_at      DateTime @default(now())
+}
+
+model calculation {
+  id                     Int      @id @default(autoincrement())
+  user_id                Int
+  calculation_date       DateTime @default(now())
+  initial_contribution   Float  
+  monthly_contribution   Float
+  monthly_rate           Float
+  months_to_reach_goal   Int
+  user                   user     @relation(fields: [user_id], references: [id])
+}
