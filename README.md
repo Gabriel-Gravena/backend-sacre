@@ -29,8 +29,8 @@ Siga as instruções abaixo para configurar e executar a API em seu ambiente de 
 ### 1. Clonar o Repositório
 
 ```bash
-git clone <URL_DO_SEU_REPOSITORIO_BACKEND>
-cd <NOME_DA_PASTA_BACKEND>
+git clone https://github.com/Gabriel-Gravena/backend-sacre.git
+cd backend-sacre
 ```
 
 ### 2. Instalar as Dependências
