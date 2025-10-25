@@ -21,7 +21,11 @@ app.register(jwt)
 app.register(authRoutes)
 app.register(calculationRoutes)
 
-app.listen({ port: 3333 })
+
+const port = process.env.PORT ? Number(process.env.PORT) : 3333;
+const host = '0.0.0.0';
+
+app.listen({ port, host })
   .then(() => {
     console.log('servidor rodando em http://localhost:3333')
   })
