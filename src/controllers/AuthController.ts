@@ -5,11 +5,11 @@ import {
     loginUserService,
     loginUserSchema,
     logoutUserService,
+    getProfileService,
 } from '../services/AuthServices';
-import { prisma } from '../plugins/prisma';
 import { ZodError } from 'zod';
 
-export const AuthController = {
+export const authController = {
     async signUp(request: FastifyRequest, reply: FastifyReply) {
         try {
             const userData = registerUserSchema.parse(request.body);
@@ -34,9 +34,18 @@ export const AuthController = {
         try {
             const credentials = loginUserSchema.parse(request.body);
 
-            const result = await loginUserService(credentials, request.server, reply);
+            const { token, user } = await loginUserService(credentials, request.server, reply);
 
-            return reply.status(200).send({ detail: 'Success', user: result.user })
+            reply.setCookie('token', token, {
+                path: '/',
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60
+            })
+
+            return reply.status(200).send({ detail: 'Success', user: user })
+            
         } catch (error) {
             if (error instanceof ZodError) {
                 return reply.status(400).send({
@@ -71,22 +80,15 @@ export const AuthController = {
         try {
             const userId = parseInt(request.user.sub);
 
-            const user = await prisma.user.findUnique({
-                where: { id: userId },
-                select: {
-                    id: true,
-                    email: true,
-                    created_at: true
-                }
-            })
-
-            if (!user) {
-                return reply.status(404).send({ detail: "Usuario nao encontrado" })
-            }
+            const user = await getProfileService(userId)
 
             return reply.status(200).send(user)
         } catch (error) {
-            return reply.status(500).send({ detail: "Erro no servidor" })
+            if (error instanceof Error && error.message === 'Usuario nao encontrado') {
+                return reply.status(404).send({ detail: "Usuario nao encontrado" });
+            }
+
+            return reply.status(500).send({ detail: "Erro no servidor" });
         }
     }
 }

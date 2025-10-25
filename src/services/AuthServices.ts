@@ -18,7 +18,6 @@ type LoginUserData = z.infer<typeof loginUserSchema>
 
 
 const BCRYPT_ROUNDS = 12;
-const JWT_EXPIRES_IN = '7d';
 
 
 export async function registerUserService({ email, password }: RegisterUserData) {
@@ -61,30 +60,18 @@ export async function loginUserService({ email, password }: LoginUserData, fasti
     }
 
     const token = fastify.jwt.sign(
+        {},
         {
-
-        },
-        {
-            sub: user.id.toString(),
-            expiresIn: '7d'
+            sub: user.id.toString()
         }
     )
-
-    reply.setCookie('token', token, {
-        path: '/',
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60
-    })
 
     return {
         token,
         user: {
             id: user.id,
             email: user.email
-        },
-        expiresIn: JWT_EXPIRES_IN
+        }
     };
 }
 
@@ -94,4 +81,21 @@ export function logoutUserService(reply: FastifyReply) {
     });
 
     return { detail: 'Logout realizado com sucesso' };
+}
+
+export async function getProfileService(userId: number) {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { 
+            id: true, 
+            email: true, 
+            created_at: true 
+        }
+    });
+
+    if (!user) {
+        throw new Error("Usuario nao encontrado");
+    }
+
+    return user;
 }

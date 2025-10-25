@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 
 
-export async function authenticatePlugin(request: FastifyRequest, reply: FastifyReply) {
+export async function authenticateMiddleware(request: FastifyRequest, reply: FastifyReply) {
   try {
     const token = request.cookies.token
 
