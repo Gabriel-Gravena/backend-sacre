@@ -11,12 +11,17 @@ import { ZodError } from 'zod';
 
 export const authController = {
     async signUp(request: FastifyRequest, reply: FastifyReply) {
+        console.log("==> Rota /signup foi acionada.");
         try {
             const userData = registerUserSchema.parse(request.body);
+            console.log("==> Validação do Zod passou com sucesso."); 
+
             await registerUserService(userData);
+            console.log("==> Serviço de registro finalizado com sucesso."); 
 
             return reply.status(201).send({ detail: 'Success' });
         } catch (error) {
+            console.error("!!!!!!!! ERRO CAPTURADO NO CONTROLLER !!!!!!!", error);
             if (error instanceof ZodError) {
                 return reply.status(400).send({
                     detail: 'Dados inválidos'
